@@ -696,7 +696,7 @@ namespace Tmds.DBus.SourceGenerator
                                     .AddArgumentListArguments(
                                         Argument(
                                             IdentifierName(signal.Arguments[i].Name is not null
-                                                ? Camelize(signal.Arguments[i].Name!)
+                                                ? SanitizeIdentifier(Camelize(signal.Arguments[i].Name!))
                                                 : $"arg{i}")))));
                     }
                 }
