@@ -17,7 +17,7 @@ namespace Tmds.DBus.SourceGenerator
                 .AddModifiers(Token(SyntaxKind.InternalKeyword));
 
             FieldDeclarationSyntax interfaceConst = MakePrivateStringConst("Interface", dBusInterface.Name!, PredefinedType(Token(SyntaxKind.StringKeyword)));
-            FieldDeclarationSyntax connectionField = MakePrivateReadOnlyField("_connection", IdentifierName("Connection"));
+            FieldDeclarationSyntax connectionField = MakePrivateReadOnlyField("_connection", IdentifierName("Tmds.DBus.Protocol.Connection"));
             FieldDeclarationSyntax destinationField = MakePrivateReadOnlyField("_destination", PredefinedType(Token(SyntaxKind.StringKeyword)));
             FieldDeclarationSyntax pathField = MakePrivateReadOnlyField("_path", PredefinedType(Token(SyntaxKind.StringKeyword)));
 
@@ -25,7 +25,7 @@ namespace Tmds.DBus.SourceGenerator
                 .AddModifiers(Token(SyntaxKind.PublicKeyword))
                 .AddParameterListParameters(
                     Parameter(Identifier("connection"))
-                        .WithType(IdentifierName("Connection")),
+                        .WithType(IdentifierName("Tmds.DBus.Protocol.Connection")),
                     Parameter(Identifier("destination"))
                         .WithType(
                             PredefinedType(Token(SyntaxKind.StringKeyword))),
@@ -129,8 +129,8 @@ namespace Tmds.DBus.SourceGenerator
                         .WithType(PredefinedType(Token(SyntaxKind.BoolKeyword)))
                         .WithDefault(EqualsValueClause(LiteralExpression(SyntaxKind.TrueLiteralExpression))),
                     Parameter(Identifier("flags"))
-                        .WithType(IdentifierName("ObserverFlags"))
-                        .WithDefault(EqualsValueClause(MakeMemberAccessExpression("ObserverFlags", "None"))));
+                        .WithType(IdentifierName("Tmds.DBus.Protocol.ObserverFlags"))
+                        .WithDefault(EqualsValueClause(MakeMemberAccessExpression("Tmds.DBus.Protocol.ObserverFlags", "None"))));
 
                 ArgumentListSyntax arguments = ArgumentList()
                     .AddArguments(
@@ -159,7 +159,7 @@ namespace Tmds.DBus.SourceGenerator
                     .WithBody(
                         Block(
                             LocalDeclarationStatement(
-                                VariableDeclaration(IdentifierName("MatchRule"))
+                                VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.MatchRule"))
                                     .AddVariables(
                                         VariableDeclarator("rule")
                                             .WithInitializer(
@@ -174,11 +174,11 @@ namespace Tmds.DBus.SourceGenerator
         }
 
         private static ObjectCreationExpressionSyntax MakeMatchRule(DBusSignal dBusSignal) =>
-            ObjectCreationExpression(IdentifierName("MatchRule"))
+            ObjectCreationExpression(IdentifierName("Tmds.DBus.Protocol.MatchRule"))
                 .WithInitializer(
                     InitializerExpression(SyntaxKind.ObjectInitializerExpression)
                         .AddExpressions(
-                            MakeAssignmentExpression(IdentifierName("Type"), MakeMemberAccessExpression("MessageType", "Signal")),
+                            MakeAssignmentExpression(IdentifierName("Type"), MakeMemberAccessExpression("Tmds.DBus.Protocol.MessageType", "Signal")),
                             MakeAssignmentExpression(IdentifierName("Sender"), IdentifierName("_destination")),
                             MakeAssignmentExpression(IdentifierName("Path"), IdentifierName("_path")),
                             MakeAssignmentExpression(IdentifierName("Member"), MakeLiteralExpression(dBusSignal.Name!)),
@@ -208,10 +208,10 @@ namespace Tmds.DBus.SourceGenerator
                                 EqualsValueClause(
                                     LiteralExpression(SyntaxKind.TrueLiteralExpression))),
                         Parameter(Identifier("flags"))
-                            .WithType(IdentifierName("ObserverFlags"))
+                            .WithType(IdentifierName("Tmds.DBus.Protocol.ObserverFlags"))
                             .WithDefault(
                                 EqualsValueClause(
-                                    MakeMemberAccessExpression("ObserverFlags", "None"))))
+                                    MakeMemberAccessExpression("Tmds.DBus.Protocol.ObserverFlags", "None"))))
                     .WithBody(
                         Block(
                             ReturnStatement(
@@ -235,7 +235,7 @@ namespace Tmds.DBus.SourceGenerator
                                 .AddModifiers(Token(SyntaxKind.StaticKeyword))
                                 .AddParameterListParameters(
                                     Parameter(Identifier("message"))
-                                        .WithType(IdentifierName("Message")),
+                                        .WithType(IdentifierName("Tmds.DBus.Protocol.Message")),
                                     Parameter(Identifier("_"))
                                         .WithType(
                                             NullableType(
@@ -243,7 +243,7 @@ namespace Tmds.DBus.SourceGenerator
                                 .WithBody(
                                     Block(
                                         LocalDeclarationStatement(
-                                            VariableDeclaration(IdentifierName("Reader"))
+                                            VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.Reader"))
                                                 .AddVariables(
                                                     VariableDeclarator("reader")
                                                         .WithInitializer(
@@ -373,14 +373,14 @@ namespace Tmds.DBus.SourceGenerator
             ParenthesizedLambdaExpressionSyntax messageValueReaderLambda = ParenthesizedLambdaExpression()
                 .AddParameterListParameters(
                     Parameter(Identifier("message"))
-                        .WithType(IdentifierName("Message")),
+                        .WithType(IdentifierName("Tmds.DBus.Protocol.Message")),
                     Parameter(Identifier("state"))
                         .WithType(
                             NullableType(PredefinedType(Token(SyntaxKind.ObjectKeyword)))))
                 .WithBody(
                     Block(
                         LocalDeclarationStatement(
-                            VariableDeclaration(IdentifierName("Reader"))
+                            VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.Reader"))
                                 .AddVariables(
                                     VariableDeclarator("reader")
                                         .WithInitializer(
@@ -411,7 +411,7 @@ namespace Tmds.DBus.SourceGenerator
                                         Argument(
                                             InvocationExpression(IdentifierName("CreateGetAllMessage"))),
                                         Argument(messageValueReaderLambda))),
-                            LocalFunctionStatement(IdentifierName("MessageBuffer"), "CreateGetAllMessage")
+                            LocalFunctionStatement(IdentifierName("Tmds.DBus.Protocol.MessageBuffer"), "CreateGetAllMessage")
                                 .WithBody(createGetAllMessageBody))));
         }
 
@@ -440,14 +440,10 @@ namespace Tmds.DBus.SourceGenerator
                         Token(SyntaxKind.PrivateKeyword),
                         Token(SyntaxKind.StaticKeyword))
                     .AddParameterListParameters(
-                        Parameter(
-                                Identifier("reader"))
-                            .WithType(
-                                IdentifierName("Reader"))
-                            .AddModifiers(
-                                Token(SyntaxKind.RefKeyword)),
-                        Parameter
-                                (Identifier("changed"))
+                        Parameter(Identifier("reader"))
+                            .WithType(IdentifierName("Tmds.DBus.Protocol.Reader"))
+                            .AddModifiers(Token(SyntaxKind.RefKeyword)),
+                        Parameter(Identifier("changed"))
                             .WithType(
                                 NullableType(
                                     GenericName("List")
@@ -472,7 +468,7 @@ namespace Tmds.DBus.SourceGenerator
                                                             IdentifierName(
                                                                 GetPropertiesClassIdentifier(dBusInterface)))))))),
                             LocalDeclarationStatement(VariableDeclaration(
-                                    IdentifierName("ArrayEnd"))
+                                    IdentifierName("Tmds.DBus.Protocol.ArrayEnd"))
                                 .AddVariables(
                                     VariableDeclarator("headersEnd")
                                         .WithInitializer(
@@ -481,7 +477,7 @@ namespace Tmds.DBus.SourceGenerator
                                                         MakeMemberAccessExpression("reader", "ReadArrayStart"))
                                                     .AddArgumentListArguments(
                                                         Argument(
-                                                            MakeMemberAccessExpression("DBusType", "Struct"))))))),
+                                                            MakeMemberAccessExpression("Tmds.DBus.Protocol.DBusType", "Struct"))))))),
                             WhileStatement(
                                 InvocationExpression(
                                         MakeMemberAccessExpression("reader", "HasNext"))
@@ -528,7 +524,7 @@ namespace Tmds.DBus.SourceGenerator
                     InvocationExpression(
                             MakeMemberAccessExpression("_connection", "CallMethodAsync"))
                         .WithArgumentList(args)),
-                LocalFunctionStatement(IdentifierName("MessageBuffer"), "CreateMessage")
+                LocalFunctionStatement(IdentifierName("Tmds.DBus.Protocol.MessageBuffer"), "CreateMessage")
                     .WithBody(createMessageBody));
 
         private static BlockSyntax MakeCreateMessageBody(ExpressionSyntax interfaceExpression, string methodName, string? signature, params StatementSyntax[] statements)
@@ -545,7 +541,7 @@ namespace Tmds.DBus.SourceGenerator
 
             return Block(
                     LocalDeclarationStatement(
-                            VariableDeclaration(IdentifierName("MessageWriter"),
+                            VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.MessageWriter"),
                                 SingletonSeparatedList(
                                     VariableDeclarator("writer")
                                         .WithInitializer(EqualsValueClause(
@@ -558,7 +554,7 @@ namespace Tmds.DBus.SourceGenerator
                 .AddStatements(statements)
                 .AddStatements(
                     LocalDeclarationStatement(
-                        VariableDeclaration(IdentifierName("MessageBuffer"))
+                        VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.MessageBuffer"))
                             .AddVariables(
                                 VariableDeclarator("message")
                                     .WithInitializer(

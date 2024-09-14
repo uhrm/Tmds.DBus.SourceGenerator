@@ -57,7 +57,7 @@ namespace Tmds.DBus.SourceGenerator
                         "PathHandler",
                         Token(SyntaxKind.PublicKeyword)),
                     MakeGetOnlyProperty(
-                        IdentifierName("Connection"),
+                        IdentifierName("Tmds.DBus.Protocol.Connection"),
                         "Connection",
                         Token(SyntaxKind.PublicKeyword),
                         Token(SyntaxKind.AbstractKeyword)),
@@ -125,7 +125,7 @@ namespace Tmds.DBus.SourceGenerator
                                 Parameter(
                                         Identifier("request"))
                                     .WithType(
-                                        IdentifierName("Message")))))
+                                        IdentifierName("Tmds.DBus.Protocol.Message")))))
                     .AddModifiers(
                         Token(SyntaxKind.ProtectedKeyword),
                         Token(SyntaxKind.AbstractKeyword))
@@ -144,7 +144,7 @@ namespace Tmds.DBus.SourceGenerator
                 {
                     BlockSyntax readParametersMethodBlock = Block(
                         LocalDeclarationStatement(
-                            VariableDeclaration(IdentifierName("Reader"))
+                            VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.Reader"))
                                 .AddVariables(
                                     VariableDeclarator("reader")
                                         .WithInitializer(
@@ -275,7 +275,7 @@ namespace Tmds.DBus.SourceGenerator
 
                     BlockSyntax replyMethodBlock = Block(
                         LocalDeclarationStatement(
-                                VariableDeclaration(IdentifierName("MessageWriter"))
+                                VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.MessageWriter"))
                                     .AddVariables(
                                         VariableDeclarator("writer")
                                             .WithInitializer(
@@ -352,7 +352,7 @@ namespace Tmds.DBus.SourceGenerator
                     Parameter(
                             Identifier("context"))
                         .WithType(
-                            IdentifierName("MethodContext")));
+                            IdentifierName("Tmds.DBus.Protocol.MethodContext")));
 
             replyInterfaceRequestMethod = switchSections.Count > 0
                 ? replyInterfaceRequestMethod.AddModifiers(
@@ -407,7 +407,7 @@ namespace Tmds.DBus.SourceGenerator
                     Parameter(
                             Identifier("context"))
                         .WithType(
-                            IdentifierName("MethodContext")));
+                            IdentifierName("Tmds.DBus.Protocol.MethodContext")));
 
             SyntaxList<SwitchSectionSyntax> getPropertySwitchSections = List(
                 dBusInterface.Properties.Where(static property => property.Access is "read" or "readwrite")
@@ -419,7 +419,7 @@ namespace Tmds.DBus.SourceGenerator
                             .AddStatements(
                                 Block(
                                     LocalDeclarationStatement(
-                                        VariableDeclaration(IdentifierName("MessageWriter"))
+                                        VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.MessageWriter"))
                                             .AddVariables(
                                                 VariableDeclarator("writer")
                                                     .WithInitializer(
@@ -477,7 +477,7 @@ namespace Tmds.DBus.SourceGenerator
                     Parameter(
                             Identifier("reader"))
                         .WithType(
-                            IdentifierName("Reader"))
+                            IdentifierName("Tmds.DBus.Protocol.Reader"))
                         .AddModifiers(
                             Token(SyntaxKind.RefKeyword)));
 
@@ -522,7 +522,7 @@ namespace Tmds.DBus.SourceGenerator
                     Parameter(
                             Identifier("context"))
                         .WithType(
-                            IdentifierName("MethodContext")))
+                            IdentifierName("Tmds.DBus.Protocol.MethodContext")))
                 .WithBody(
                     Block(
                         ExpressionStatement(
@@ -535,7 +535,7 @@ namespace Tmds.DBus.SourceGenerator
                             .AddBodyStatements(
                                 LocalDeclarationStatement(
                                     VariableDeclaration(
-                                            IdentifierName("MessageWriter"))
+                                            IdentifierName("Tmds.DBus.Protocol.MessageWriter"))
                                         .AddVariables(
                                             VariableDeclarator("writer")
                                                 .WithInitializer(
@@ -547,7 +547,7 @@ namespace Tmds.DBus.SourceGenerator
                                                                     MakeLiteralExpression("a{sv}"))))))),
                                 LocalDeclarationStatement(
                                     VariableDeclaration(
-                                            IdentifierName("ArrayStart"))
+                                            IdentifierName("Tmds.DBus.Protocol.ArrayStart"))
                                         .AddVariables(
                                             VariableDeclarator("dictStart")
                                                 .WithInitializer(
@@ -600,7 +600,7 @@ namespace Tmds.DBus.SourceGenerator
             MemberDeclarationSyntax getAllPropertiesMethod = MethodDeclaration(
                     GenericName("Dictionary")
                         .AddTypeArgumentListArguments(
-                            IdentifierName("string"), IdentifierName("Variant")),
+                            IdentifierName("string"), IdentifierName("Tmds.DBus.Protocol.Variant")),
                     "GetAllProperties")
                 .AddModifiers(
                     Token(SyntaxKind.PublicKeyword))
@@ -609,7 +609,7 @@ namespace Tmds.DBus.SourceGenerator
                         VariableDeclaration(
                                 GenericName("Dictionary")
                                     .AddTypeArgumentListArguments(
-                                        IdentifierName("string"), IdentifierName("Variant")))
+                                        IdentifierName("string"), IdentifierName("Tmds.DBus.Protocol.Variant")))
                             .AddVariables(
                                 VariableDeclarator("result")
                                     .WithInitializer(
@@ -617,7 +617,7 @@ namespace Tmds.DBus.SourceGenerator
                                             ObjectCreationExpression(
                                                     GenericName("Dictionary")
                                                         .AddTypeArgumentListArguments(
-                                                            IdentifierName("string"), IdentifierName("Variant")))
+                                                            IdentifierName("string"), IdentifierName("Tmds.DBus.Protocol.Variant")))
                                                 .AddArgumentListArguments(
                                                     Argument(MakeLiteralExpression(dBusInterface.Properties.Count()))))))))
                 .AddBodyStatements(
@@ -635,14 +635,14 @@ namespace Tmds.DBus.SourceGenerator
                                 {
                                     DBusType.Array =>
                                         ObjectCreationExpression(
-                                                GenericName("Array")
+                                                GenericName("Tmds.DBus.Protocol.Array")
                                                     .AddTypeArgumentListArguments(
                                                         GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false)))
                                             .AddArgumentListArguments(
                                                 Argument(IdentifierName(property.Name!))),
                                     DBusType.DictEntry =>
                                         ObjectCreationExpression(
-                                                GenericName("Dict")
+                                                GenericName("Tmds.DBus.Protocol.Dict")
                                                     .AddTypeArgumentListArguments(
                                                         GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false),
                                                         GetDotnetType(property.InnerDBusTypes![1], AccessMode.Write, false)))
@@ -652,13 +652,13 @@ namespace Tmds.DBus.SourceGenerator
                                         property.InnerDBusTypes!.Length switch
                                         {
                                             1 => ObjectCreationExpression(
-                                                        GenericName("Struct")
+                                                        GenericName("Tmds.DBus.Protocol.Struct")
                                                             .AddTypeArgumentListArguments(
                                                                 GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false)))
                                                     .AddArgumentListArguments(
                                                         Argument(MakeMemberAccessExpression(property.Name!, "Item1"))),
                                             2 => ObjectCreationExpression(
-                                                        GenericName("Struct")
+                                                        GenericName("Tmds.DBus.Protocol.Struct")
                                                             .AddTypeArgumentListArguments(
                                                                 GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false),
                                                                 GetDotnetType(property.InnerDBusTypes![1], AccessMode.Write, false)))
@@ -666,7 +666,7 @@ namespace Tmds.DBus.SourceGenerator
                                                         Argument(MakeMemberAccessExpression(property.Name!, "Item1")),
                                                         Argument(MakeMemberAccessExpression(property.Name!, "Item2"))),
                                             3 => ObjectCreationExpression(
-                                                        GenericName("Struct")
+                                                        GenericName("Tmds.DBus.Protocol.Struct")
                                                             .AddTypeArgumentListArguments(
                                                                 GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false),
                                                                 GetDotnetType(property.InnerDBusTypes![1], AccessMode.Write, false),
@@ -676,7 +676,7 @@ namespace Tmds.DBus.SourceGenerator
                                                         Argument(MakeMemberAccessExpression(property.Name!, "Item2")),
                                                         Argument(MakeMemberAccessExpression(property.Name!, "Item3"))),
                                             4 => ObjectCreationExpression(
-                                                        GenericName("Struct")
+                                                        GenericName("Tmds.DBus.Protocol.Struct")
                                                             .AddTypeArgumentListArguments(
                                                                 GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false),
                                                                 GetDotnetType(property.InnerDBusTypes![1], AccessMode.Write, false),
@@ -752,7 +752,7 @@ namespace Tmds.DBus.SourceGenerator
 
                 body = body.AddStatements(
                     LocalDeclarationStatement(
-                        VariableDeclaration(IdentifierName("MessageWriter"),
+                        VariableDeclaration(IdentifierName("Tmds.DBus.Protocol.MessageWriter"),
                             SingletonSeparatedList(
                                 VariableDeclarator("writer")
                                     .WithInitializer(EqualsValueClause(

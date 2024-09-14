@@ -19,7 +19,7 @@ namespace Tmds.DBus.SourceGenerator
                     Parameter(
                             Identifier("writer"))
                         .WithType(
-                            IdentifierName("MessageWriter"))
+                            IdentifierName("Tmds.DBus.Protocol.MessageWriter"))
                         .AddModifiers(
                             Token(SyntaxKind.ThisKeyword),
                             Token(SyntaxKind.RefKeyword)),
@@ -51,14 +51,14 @@ namespace Tmds.DBus.SourceGenerator
                     Parameter(
                             Identifier("writer"))
                         .WithType(
-                            IdentifierName("MessageWriter"))
+                            IdentifierName("Tmds.DBus.Protocol.MessageWriter"))
                         .AddModifiers(
                             Token(SyntaxKind.ThisKeyword),
                             Token(SyntaxKind.RefKeyword)),
                     Parameter(
                             Identifier("value"))
                         .WithType(
-                            IdentifierName("ObjectPath")))
+                            IdentifierName("Tmds.DBus.Protocol.ObjectPath")))
                 .WithExpressionBody(
                     ArrowExpressionClause(
                         InvocationExpression(
@@ -74,25 +74,23 @@ namespace Tmds.DBus.SourceGenerator
                                                   using System;
                                                   using System.Threading.Tasks;
                                                   
-                                                  using Tmds.DBus.Protocol;
-
                                                   #pragma warning disable
                                                   #nullable enable
                                                   namespace Tmds.DBus.SourceGenerator
                                                   {
                                                       internal static class SignalHelper
                                                       {
-                                                          public static ValueTask<IDisposable> WatchSignalAsync(Connection connection, MatchRule rule, Action<Exception?> handler, bool emitOnCapturedContext = true, ObserverFlags flags = ObserverFlags.None)
+                                                          public static ValueTask<IDisposable> WatchSignalAsync(Tmds.DBus.Protocol.Connection connection, Tmds.DBus.Protocol.MatchRule rule, Action<Exception?> handler, bool emitOnCapturedContext = true, Tmds.DBus.Protocol.ObserverFlags flags = Tmds.DBus.Protocol.ObserverFlags.None)
                                                               => connection.AddMatchAsync(rule, static (_, _) => null !, static (Exception? e, object _, object? _, object? handlerState) => ((Action<Exception?>)handlerState!).Invoke(e), null, handler, emitOnCapturedContext, flags);
                                                   
-                                                          public static ValueTask<IDisposable> WatchSignalAsync<T>(Connection connection, MatchRule rule, MessageValueReader<T> reader, Action<Exception?, T> handler, bool emitOnCapturedContext = true, ObserverFlags flags = ObserverFlags.None)
+                                                          public static ValueTask<IDisposable> WatchSignalAsync<T>(Tmds.DBus.Protocol.Connection connection, Tmds.DBus.Protocol.MatchRule rule, Tmds.DBus.Protocol.MessageValueReader<T> reader, Action<Exception?, T> handler, bool emitOnCapturedContext = true, Tmds.DBus.Protocol.ObserverFlags flags = Tmds.DBus.Protocol.ObserverFlags.None)
                                                               => connection.AddMatchAsync(rule, reader, static (e, arg, _, handlerState) => ((Action<Exception?, T>)handlerState!).Invoke(e, arg), null, handler, emitOnCapturedContext, flags);
                                                   
-                                                          public static ValueTask<IDisposable> WatchPropertiesChangedAsync<T>(Connection connection, string destination, string path, string @interface, MessageValueReader<PropertyChanges<T>> reader, Action<Exception?, PropertyChanges<T>> handler, bool emitOnCapturedContext = true, ObserverFlags flags = ObserverFlags.None)
+                                                          public static ValueTask<IDisposable> WatchPropertiesChangedAsync<T>(Tmds.DBus.Protocol.Connection connection, string destination, string path, string @interface, Tmds.DBus.Protocol.MessageValueReader<PropertyChanges<T>> reader, Action<Exception?, PropertyChanges<T>> handler, bool emitOnCapturedContext = true, Tmds.DBus.Protocol.ObserverFlags flags = Tmds.DBus.Protocol.ObserverFlags.None)
                                                           {
-                                                              MatchRule rule = new()
+                                                              Tmds.DBus.Protocol.MatchRule rule = new()
                                                               {
-                                                                  Type = MessageType.Signal,
+                                                                  Type = Tmds.DBus.Protocol.MessageType.Signal,
                                                                   Sender = destination,
                                                                   Path = path,
                                                                   Member = "PropertiesChanged",
@@ -129,8 +127,6 @@ namespace Tmds.DBus.SourceGenerator
                                                               using System.Collections.Generic;
                                                               using System.Threading.Tasks;
                                                               
-                                                              using Tmds.DBus.Protocol;
-
                                                               #pragma warning disable
                                                               #nullable enable
                                                               namespace Tmds.DBus.SourceGenerator
@@ -139,21 +135,21 @@ namespace Tmds.DBus.SourceGenerator
                                                                   {
                                                                       PathHandler? PathHandler { get; set; }
                                                                   
-                                                                      Connection Connection { get; }
+                                                                      Tmds.DBus.Protocol.Connection Connection { get; }
                                                               
                                                                       string InterfaceName { get; }
                                                               
                                                                       ReadOnlyMemory<byte> IntrospectXml { get; }
                                                               
-                                                                      void ReplyGetProperty(string name, MethodContext context);
+                                                                      void ReplyGetProperty(string name, Tmds.DBus.Protocol.MethodContext context);
 
-                                                                      Dictionary<string,Variant> GetAllProperties();
+                                                                      Dictionary<string,Tmds.DBus.Protocol.Variant> GetAllProperties();
                                                               
-                                                                      void ReplyGetAllProperties(MethodContext context);
+                                                                      void ReplyGetAllProperties(Tmds.DBus.Protocol.MethodContext context);
                                                                       
-                                                                      void SetProperty(string name, ref Reader reader);
+                                                                      void SetProperty(string name, ref Tmds.DBus.Protocol.Reader reader);
                                                                       
-                                                                      ValueTask ReplyInterfaceRequest(MethodContext context);
+                                                                      ValueTask ReplyInterfaceRequest(Tmds.DBus.Protocol.MethodContext context);
                                                                   }
                                                               }
 
@@ -165,13 +161,11 @@ namespace Tmds.DBus.SourceGenerator
                                                  using System.Linq;
                                                  using System.Threading.Tasks;
 
-                                                 using Tmds.DBus.Protocol;
-
                                                  #pragma warning disable
                                                  #nullable enable
                                                  namespace Tmds.DBus.SourceGenerator
                                                  {
-                                                     internal class PathHandler : IMethodHandler
+                                                     internal class PathHandler : Tmds.DBus.Protocol.IMethodHandler
                                                      {
                                                          private readonly bool _runMethodHandlerSynchronously;
                                                          private readonly ICollection<IDBusInterfaceHandler> _dbusInterfaces;
@@ -187,7 +181,7 @@ namespace Tmds.DBus.SourceGenerator
                                                          public string Path { get; }
                                                  
                                                          /// <inheritdoc />
-                                                         public async ValueTask HandleMethodAsync(MethodContext context)
+                                                         public async ValueTask HandleMethodAsync(Tmds.DBus.Protocol.MethodContext context)
                                                          {
                                                              switch (context.Request.InterfaceAsString)
                                                              {
@@ -199,7 +193,7 @@ namespace Tmds.DBus.SourceGenerator
                                                                              Reply();
                                                                              void Reply()
                                                                              {
-                                                                                 Reader reader = context.Request.GetBodyReader();
+                                                                                 Tmds.DBus.Protocol.Reader reader = context.Request.GetBodyReader();
                                                                                  string @interface = reader.ReadString();
                                                                                  IDBusInterfaceHandler? handler = _dbusInterfaces.FirstOrDefault(x => x.InterfaceName == @interface);
                                                                                  if (handler is null)
@@ -215,7 +209,7 @@ namespace Tmds.DBus.SourceGenerator
                                                                              Reply();
                                                                              void Reply()
                                                                              {
-                                                                                 Reader reader = context.Request.GetBodyReader();
+                                                                                 Tmds.DBus.Protocol.Reader reader = context.Request.GetBodyReader();
                                                                                  string @interface = reader.ReadString();
                                                                                  IDBusInterfaceHandler? handler = _dbusInterfaces.FirstOrDefault(x => x.InterfaceName == @interface);
                                                                                  if (handler is null)
@@ -230,7 +224,7 @@ namespace Tmds.DBus.SourceGenerator
                                                                              Reply();
                                                                              void Reply()
                                                                              {
-                                                                                 Reader reader = context.Request.GetBodyReader();
+                                                                                 Tmds.DBus.Protocol.Reader reader = context.Request.GetBodyReader();
                                                                                  string @interface = reader.ReadString();
                                                                                  IDBusInterfaceHandler? handler = _dbusInterfaces.FirstOrDefault(x => x.InterfaceName == @interface);
                                                                                  if (handler is null)
@@ -239,7 +233,7 @@ namespace Tmds.DBus.SourceGenerator
                                                                                  handler.SetProperty(member, ref reader);
                                                                                  if (!context.NoReplyExpected)
                                                                                  {
-                                                                                     using MessageWriter writer = context.CreateReplyWriter(null);
+                                                                                     using Tmds.DBus.Protocol.MessageWriter writer = context.CreateReplyWriter(null);
                                                                                      context.Reply(writer.CreateMessage());
                                                                                  }
                                                                              }
@@ -261,7 +255,7 @@ namespace Tmds.DBus.SourceGenerator
                                                          }
                                                  
                                                          /// <inheritdoc />
-                                                         public bool RunMethodHandlerSynchronously(Message message) => _runMethodHandlerSynchronously;
+                                                         public bool RunMethodHandlerSynchronously(Tmds.DBus.Protocol.Message message) => _runMethodHandlerSynchronously;
                                                  
                                                          /// <inheritdoc />
                                                          public void Add(IDBusInterfaceHandler item)

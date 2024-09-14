@@ -197,13 +197,13 @@ namespace Tmds.DBus.SourceGenerator
                         str = NullableType(str);
                     return str;
                 case DBusType.ObjectPath:
-                    return IdentifierName("ObjectPath");
+                    return IdentifierName("Tmds.DBus.Protocol.ObjectPath");
                 case DBusType.Signature:
-                    return IdentifierName("Signature");
+                    return IdentifierName("Tmds.DBus.Protocol.Signature");
                 case DBusType.Variant when accessMode == AccessMode.Read:
-                    return IdentifierName("VariantValue");
+                    return IdentifierName("Tmds.DBus.Protocol.VariantValue");
                 case DBusType.Variant when accessMode == AccessMode.Write:
-                    return IdentifierName("Variant");
+                    return IdentifierName("Tmds.DBus.Protocol.Variant");
                 case DBusType.UnixFd:
                     return IdentifierName("SafeFileHandle");
                 case DBusType.Array:
