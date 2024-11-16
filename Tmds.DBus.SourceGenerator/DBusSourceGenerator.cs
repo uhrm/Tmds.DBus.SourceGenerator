@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -20,6 +21,12 @@ namespace Tmds.DBus.SourceGenerator
         private Dictionary<string, MethodDeclarationSyntax> _readMethodExtensions = null!;
         private Dictionary<string, MethodDeclarationSyntax> _writeMethodExtensions = null!;
 
+        private class DBusInterfaceNameEqualityComparer : IEqualityComparer<DBusInterface>
+        {
+            public bool Equals(DBusInterface? a, DBusInterface? b) => a?.Name == b?.Name;
+            public int GetHashCode(DBusInterface? i) => i?.Name?.GetHashCode() ?? 0;
+        }
+
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             _readMethodExtensions = new Dictionary<string, MethodDeclarationSyntax>();
@@ -33,7 +40,7 @@ namespace Tmds.DBus.SourceGenerator
                 IgnoreComments = true
             };
 
-            IncrementalValuesProvider<(DBusNode, string)> generatorProvider = context.AdditionalTextsProvider
+            IncrementalValuesProvider<(DBusNode Node, string GeneratorMode)> generatorProvider = context.AdditionalTextsProvider
                 .Where(static x => x.Path.EndsWith(".xml", StringComparison.Ordinal))
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Select((x, _) =>
@@ -51,32 +58,31 @@ namespace Tmds.DBus.SourceGenerator
             {
                 if (provider.IsEmpty)
                     return;
-                foreach ((DBusNode Node, string GeneratorMode) value in provider)
+                IEnumerable<(DBusInterface DBusInterface, string GeneratorModes)> interfaces = provider
+                    .SelectMany(value => value.Node.Interfaces.Select<DBusInterface,(DBusInterface DBusInterface,string GeneratorMode)>(dbusInterface => (dbusInterface, value.GeneratorMode)))
+                    .ToLookup(interfaces => interfaces.DBusInterface, interfaces => interfaces.GeneratorMode, new DBusInterfaceNameEqualityComparer())
+                    .Select(interfaces => (interfaces.Key, string.Join(",", interfaces)));
+                foreach ((DBusInterface DBusInterface, string GeneratorModes) @interface in interfaces)
                 {
-                    switch (value.GeneratorMode)
+                    if (@interface.GeneratorModes.Contains("Proxy"))
                     {
-                        case "Proxy":
-                            foreach (DBusInterface dBusInterface in value.Node.Interfaces!)
-                            {
-                                TypeDeclarationSyntax typeDeclarationSyntax = GenerateProxy(dBusInterface);
-                                NamespaceDeclarationSyntax namespaceDeclaration = NamespaceDeclaration(
-                                    IdentifierName("Tmds.DBus.SourceGenerator"))
-                                    .AddMembers(typeDeclarationSyntax);
-                                CompilationUnitSyntax compilationUnit = MakeCompilationUnit(namespaceDeclaration);
-                                productionContext.AddSource($"Tmds.DBus.SourceGenerator.{Pascalize(dBusInterface.Name!)}Proxy.g.cs", compilationUnit.GetText(Encoding.UTF8));
-                            }
-                            break;
-                        case "Handler":
-                            foreach (DBusInterface dBusInterface in value.Node.Interfaces!)
-                            {
-                                TypeDeclarationSyntax typeDeclarationSyntax = GenerateHandler(dBusInterface);
-                                NamespaceDeclarationSyntax namespaceDeclaration = NamespaceDeclaration(
-                                        IdentifierName("Tmds.DBus.SourceGenerator"))
-                                    .AddMembers(typeDeclarationSyntax);
-                                CompilationUnitSyntax compilationUnit = MakeCompilationUnit(namespaceDeclaration);
-                                productionContext.AddSource($"Tmds.DBus.SourceGenerator.{Pascalize(dBusInterface.Name!)}Handler.g.cs", compilationUnit.GetText(Encoding.UTF8));
-                            }
-                            break;
+                        TypeDeclarationSyntax typeDeclarationSyntax = GenerateProxy(@interface.DBusInterface);
+                        NamespaceDeclarationSyntax namespaceDeclaration = NamespaceDeclaration(
+                            IdentifierName("Tmds.DBus.SourceGenerator"))
+                            .AddMembers(typeDeclarationSyntax);
+                        CompilationUnitSyntax compilationUnit = MakeCompilationUnit(namespaceDeclaration);
+                        string sourceName = $"Tmds.DBus.SourceGenerator.{Pascalize(@interface.DBusInterface.Name!)}Proxy.g.cs";
+                        productionContext.AddSource(sourceName, compilationUnit.GetText(Encoding.UTF8));
+                    }
+                    if (@interface.GeneratorModes.Contains("Handler"))
+                    {
+                        TypeDeclarationSyntax typeDeclarationSyntax = GenerateHandler(@interface.DBusInterface);
+                        NamespaceDeclarationSyntax namespaceDeclaration = NamespaceDeclaration(
+                                IdentifierName("Tmds.DBus.SourceGenerator"))
+                            .AddMembers(typeDeclarationSyntax);
+                        CompilationUnitSyntax compilationUnit = MakeCompilationUnit(namespaceDeclaration);
+                        string sourceName = $"Tmds.DBus.SourceGenerator.{Pascalize(@interface.DBusInterface.Name!)}Handler.g.cs";
+                        productionContext.AddSource(sourceName, compilationUnit.GetText(Encoding.UTF8));
                     }
                 }
 
