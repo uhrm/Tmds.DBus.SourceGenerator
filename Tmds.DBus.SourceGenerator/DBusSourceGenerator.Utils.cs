@@ -71,7 +71,10 @@ namespace Tmds.DBus.SourceGenerator
                     AccessorDeclaration(SyntaxKind.SetAccessorDeclaration).WithSemicolonToken(Token(SyntaxKind.SemicolonToken)));
 
         private static ExpressionStatementSyntax MakeAssignmentExpressionStatement(string left, string right) =>
-            ExpressionStatement(MakeAssignmentExpression(IdentifierName(left), IdentifierName(right)));
+            MakeAssignmentExpressionStatement(IdentifierName(left), IdentifierName(right));
+
+        private static ExpressionStatementSyntax MakeAssignmentExpressionStatement(ExpressionSyntax left, ExpressionSyntax right) =>
+            ExpressionStatement(MakeAssignmentExpression(left, right));
 
         private static AssignmentExpressionSyntax MakeAssignmentExpression(ExpressionSyntax left, ExpressionSyntax right) =>
             AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, left, right);
@@ -83,6 +86,8 @@ namespace Tmds.DBus.SourceGenerator
             MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, MakeMemberAccessExpression(left, middle), IdentifierName(right));
 
         private static LiteralExpressionSyntax MakeLiteralExpression(string literal) => LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(literal));
+
+        private static LiteralExpressionSyntax MakeLiteralExpression(int literal) => LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(literal));
 
         private static SyntaxToken Utf8Literal(string value) =>
             Token(

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -596,7 +597,105 @@ namespace Tmds.DBus.SourceGenerator
                                                 InvocationExpression(
                                                     MakeMemberAccessExpression("writer", "CreateMessage"))))))));
 
-            cl = cl.AddMembers(replyGetPropertyMethod, setPropertyMethod, replyGetAllPropertiesMethod);
+            MemberDeclarationSyntax getAllPropertiesMethod = MethodDeclaration(
+                    GenericName("Dictionary")
+                        .AddTypeArgumentListArguments(
+                            IdentifierName("string"), IdentifierName("Variant")),
+                    "GetAllProperties")
+                .AddModifiers(
+                    Token(SyntaxKind.PublicKeyword))
+                .AddBodyStatements(
+                    LocalDeclarationStatement(
+                        VariableDeclaration(
+                                GenericName("Dictionary")
+                                    .AddTypeArgumentListArguments(
+                                        IdentifierName("string"), IdentifierName("Variant")))
+                            .AddVariables(
+                                VariableDeclarator("result")
+                                    .WithInitializer(
+                                        EqualsValueClause(
+                                            ObjectCreationExpression(
+                                                    GenericName("Dictionary")
+                                                        .AddTypeArgumentListArguments(
+                                                            IdentifierName("string"), IdentifierName("Variant")))
+                                                .AddArgumentListArguments(
+                                                    Argument(MakeLiteralExpression(dBusInterface.Properties.Count()))))))))
+                .AddBodyStatements(
+                    dBusInterface.Properties
+                        .Where(static property => property.Access is "read" or "readwrite")
+                        .Select(static property =>
+                            MakeAssignmentExpressionStatement(
+                                ElementAccessExpression(IdentifierName("result"))
+                                    .WithArgumentList(
+                                        BracketedArgumentList(
+                                            SingletonSeparatedList(
+                                                Argument(
+                                                    MakeLiteralExpression(property.Name!))))),
+                                property.DBusType switch
+                                {
+                                    DBusType.Array =>
+                                        ObjectCreationExpression(
+                                                GenericName("Array")
+                                                    .AddTypeArgumentListArguments(
+                                                        GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false)))
+                                            .AddArgumentListArguments(
+                                                Argument(IdentifierName(property.Name!))),
+                                    DBusType.DictEntry =>
+                                        ObjectCreationExpression(
+                                                GenericName("Dict")
+                                                    .AddTypeArgumentListArguments(
+                                                        GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false),
+                                                        GetDotnetType(property.InnerDBusTypes![1], AccessMode.Write, false)))
+                                            .AddArgumentListArguments(
+                                                Argument(IdentifierName(property.Name!))),
+                                    DBusType.Struct =>
+                                        property.InnerDBusTypes!.Length switch
+                                        {
+                                            1 => ObjectCreationExpression(
+                                                        GenericName("Struct")
+                                                            .AddTypeArgumentListArguments(
+                                                                GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false)))
+                                                    .AddArgumentListArguments(
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item1"))),
+                                            2 => ObjectCreationExpression(
+                                                        GenericName("Struct")
+                                                            .AddTypeArgumentListArguments(
+                                                                GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false),
+                                                                GetDotnetType(property.InnerDBusTypes![1], AccessMode.Write, false)))
+                                                    .AddArgumentListArguments(
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item1")),
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item2"))),
+                                            3 => ObjectCreationExpression(
+                                                        GenericName("Struct")
+                                                            .AddTypeArgumentListArguments(
+                                                                GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false),
+                                                                GetDotnetType(property.InnerDBusTypes![1], AccessMode.Write, false),
+                                                                GetDotnetType(property.InnerDBusTypes![2], AccessMode.Write, false)))
+                                                    .AddArgumentListArguments(
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item1")),
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item2")),
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item3"))),
+                                            4 => ObjectCreationExpression(
+                                                        GenericName("Struct")
+                                                            .AddTypeArgumentListArguments(
+                                                                GetDotnetType(property.InnerDBusTypes![0], AccessMode.Write, false),
+                                                                GetDotnetType(property.InnerDBusTypes![1], AccessMode.Write, false),
+                                                                GetDotnetType(property.InnerDBusTypes![2], AccessMode.Write, false),
+                                                                GetDotnetType(property.InnerDBusTypes![3], AccessMode.Write, false)))
+                                                    .AddArgumentListArguments(
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item1")),
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item2")),
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item3")),
+                                                        Argument(MakeMemberAccessExpression(property.Name!, "Item4"))),
+                                            _ => throw new InvalidOperationException($"Cannot create variant of struct with more than 10 items"),
+                                        },
+                                    _ => IdentifierName(property.Name!)
+                                }))
+                        .ToArray())
+                .AddBodyStatements(
+                    ReturnStatement(IdentifierName("result")));
+
+            cl = cl.AddMembers(replyGetPropertyMethod, setPropertyMethod, replyGetAllPropertiesMethod, getAllPropertiesMethod);
         }
 
         private void AddHandlerIntrospect(ref ClassDeclarationSyntax cl, DBusInterface dBusInterface)
